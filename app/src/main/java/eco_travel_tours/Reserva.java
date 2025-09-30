@@ -1,34 +1,26 @@
-package main.java.eco_travel_tours;
+package eco_travel_tours;
 
 public class Reserva {
     private String cliente;
     private int idReserva;
     private double costo;
 
-    // CCONSTRUCTOR
+    // Constructor simple (sin validaciones complicadas)
     public Reserva(String cliente, int idReserva, double costo) {
         this.cliente = cliente;
         this.idReserva = idReserva;
         this.costo = costo;
     }
 
-    // GETTERS (obtener datos)
-    public String getCliente() {
-        return cliente;
-    }
+    // GETTERS
+    public String getCliente() { return cliente; }
+    public int getIdReserva() { return idReserva; }
+    public double getCosto() { return costo; }
 
-    public int getIdReserva() {
-        return idReserva;
-    }
-
-    public double getCosto() {
-        return costo;
-    }
-
-    // SETTERS (cambiar datos)
+    // SETTERS con control básico (mensajes y no cambia si es inválido)
     public void setCliente(String cliente) {
-        if (cliente == null) {
-            System.out.println("Error: El nombre del cliente no puede estar vacio");
+        if (cliente == null || cliente.equals("")) {
+            System.out.println("Error: El nombre del cliente no puede estar vacío");
         } else {
             this.cliente = cliente;
         }
@@ -42,11 +34,9 @@ public class Reserva {
         }
     }
 
-    // SOBREESCRIBIR el toString de java
     @Override
     public String toString() {
         return "Reserva { id=" + idReserva +
-                ", cliente='" + cliente + "', costo=" + costo + " }";
+               ", cliente='" + cliente + "', costo=" + costo + " }";
     }
 }
-

@@ -1,77 +1,93 @@
-package main.java.eco_travel_tours;
+package eco_travel_tours;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ListaDobleReservas {
-    private NodoDoble head; // primer nodo
-    private NodoDoble cola; // último nodo
+    private NodoDoble head; // primero
+    private NodoDoble cola; // último
+    private int size;
 
-    // FUNCIÓN INSERTAR
+    // ==== utilidades básicas ====
+    public boolean estaVacia() { return head == null; }
+    public int size() { return size; }
+    public NodoDoble getHead() { return head; } // útil si quieres recorrer desde fuera
+
+    // ==== insertar (al final) ====
     public void insertar(Reserva r) {
+        if (r == null) {
+            System.out.println("Error: reserva nula");
+            return;
+        }
+        // evitar id duplicado
+        if (buscarPorId(r.getIdReserva()) != null) {
+            System.out.println("Error: id repetido (" + r.getIdReserva() + ")");
+            return;
+        }
         NodoDoble nuevo = new NodoDoble(r);
-        if (head == null) { // lista vacía
+        if (head == null) {
             head = cola = nuevo;
         } else {
             cola.next = nuevo;
             nuevo.prev = cola;
             cola = nuevo;
         }
+        size++;
     }
 
-    // BUSACR
+    // ==== buscar por id ====
     public Reserva buscarPorId(int id) {
         NodoDoble p = head;
         while (p != null) {
-            if (p.data.getIdReserva() == id) {
-                return p.data;
-            }
+            if (p.data.getIdReserva() == id) return p.data;
             p = p.next;
         }
-        return null; // no encontrado
+        return null;
     }
 
-    // ELIMINAR
+    // ==== eliminar por id ====
     public void eliminarPorId(int id) {
         NodoDoble p = head;
         while (p != null) {
             if (p.data.getIdReserva() == id) {
-                if (p.prev != null) {
-                    p.prev.next = p.next;
-                } else {
-                    head = p.next; // era la cabeza
-                }
-                if (p.next != null) {
-                    p.next.prev = p.prev;
-                } else {
-                    cola = p.prev; // era la cola
-                }
-                return; // eliminado
+                if (p.prev != null) p.prev.next = p.next; else head = p.next;
+                if (p.next != null) p.next.prev = p.prev; else cola = p.prev;
+                size--;
+                return;
             }
             p = p.next;
         }
         System.out.println("No se encontró id=" + id);
     }
 
-    // Imprimir
+    // ==== imprimir ====
     public void imprimir() {
-        NodoDoble p = head;
-        while (p != null) {
-            System.out.print(p.data + " <-> ");
-            p = p.next;
-        }
-        System.out.println("null");
+        System.out.println(imprimirComoTexto());
     }
 
-    // ORDENAMIENTO 1--> nombre cliente alfabetico
+    // Devolver la lista como texto (útil para JOptionPane)
+    public String imprimirComoTexto() {
+        StringBuilder sb = new StringBuilder();
+        NodoDoble p = head;
+        while (p != null) {
+            sb.append(p.data).append("\n");
+            p = p.next;
+        }
+        if (sb.length() == 0) sb.append("(lista vacía)");
+        return sb.toString();
+    }
+
+    // ==== ordenamientos in-place (intercambiando data en nodos) ====
     public void ordenarPorCliente() {
-        if (head == null)
-            return;
+        if (head == null) return;
         NodoDoble i = head;
         while (i != null) {
             NodoDoble j = i.next;
             while (j != null) {
                 if (i.data.getCliente().compareToIgnoreCase(j.data.getCliente()) > 0) {
-                    Reserva tmp = i.data;
-                    i.data = j.data;
-                    j.data = tmp;
+                    Reserva tmp = i.data; i.data = j.data; j.data = tmp;
                 }
                 j = j.next;
             }
@@ -79,18 +95,14 @@ public class ListaDobleReservas {
         }
     }
 
-    // ORDENAMIENTO 2--> costo menor a mayor
     public void ordenarPorCosto() {
-        if (head == null)
-            return;
+        if (head == null) return;
         NodoDoble i = head;
         while (i != null) {
             NodoDoble j = i.next;
             while (j != null) {
                 if (i.data.getCosto() > j.data.getCosto()) {
-                    Reserva tmp = i.data;
-                    i.data = j.data;
-                    j.data = tmp;
+                    Reserva tmp = i.data; i.data = j.data; j.data = tmp;
                 }
                 j = j.next;
             }
@@ -98,177 +110,104 @@ public class ListaDobleReservas {
         }
     }
 
-    //Punto 3
+    // ============================================================
+    //                P U N T O   3 :  E S T A D Í S T I C A S
+    // (Se usa ArrayList solo para cálculos; NO para ordenar la lista)
+    // ============================================================
 
-    public int contarReservas() {
-        int contReservas = 0;
-        NodoDoble p = head;
-        while (p != null) { // recorremos toda la lista
-            count++;
-            p = p.next;
-        }
-        return contReservas; // devolvemos el total
-    }
-
-    public double promedio() {
-        if (head == null) return 0; // si la lista está vacía, retorno 0
-        double sumaCostos = 0;
-        int contProm = 0;
+    private ArrayList<Double> getCostos() {
+        ArrayList<Double> costos = new ArrayList<>();
         NodoDoble p = head;
         while (p != null) {
-            sumaCostos += p.data.getCosto(); // sumo cada costo
-            contProm++;
+            costos.add(p.data.getCosto());
             p = p.next;
         }
-        return sumaCostos / contProm;
+        return costos;
     }
 
-    public double minimo() {
-        if (head == null) return 0;
-        double min = head.data.getCosto();
-        NodoDoble p = head.next; // empezamos desde el segundo nodo
-        while (p != null) {
-            if (p.data.getCosto() < min) { // si encuentro un menor
-                min = p.data.getCosto(); // lo actualizo
-            }
-            p = p.next;
+    public boolean hayDatos() { return size > 0; }
+
+    public double promedioCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return 0;
+        double suma = 0;
+        for (double x : c) suma += x;
+        return suma / c.size();
+    }
+
+    public double minimoCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return 0;
+        double m = c.get(0);
+        for (double x : c) if (x < m) m = x;
+        return m;
+    }
+
+    public double maximoCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return 0;
+        double M = c.get(0);
+        for (double x : c) if (x > M) M = x;
+        return M;
+    }
+
+    public double rangoCosto() {
+        if (!hayDatos()) return 0;
+        return maximoCosto() - minimoCosto();
+    }
+
+    public double varianzaCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return 0;
+        double prom = promedioCosto();
+        double acum = 0;
+        for (double x : c) {
+            double d = x - prom;
+            acum += d * d;
         }
-        return min; // retorno el mínimo encontrado
+        return acum / c.size(); // varianza poblacional
     }
 
-    public double maximo() {
-        if (head == null) return 0;
-        double max = head.data.getCosto(); // inicio con el primer costo
-        NodoDoble p = head.next;
-        while (p != null) {
-            if (p.data.getCosto() > max) { // si encuentro un mayor
-                max = p.data.getCosto(); // lo actualizo
-            }
-            p = p.next;
+    public double desviacionEstandarCosto() {
+        return Math.sqrt(varianzaCosto());
+    }
+
+    public double medianaCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return 0;
+        Collections.sort(c);
+        int n = c.size();
+        if (n % 2 == 1) return c.get(n / 2);
+        return (c.get(n / 2 - 1) + c.get(n / 2)) / 2.0;
+    }
+
+    public Double modaCosto() {
+        ArrayList<Double> c = getCostos();
+        if (c.isEmpty()) return null;
+        Map<Double, Integer> freq = new HashMap<>();
+        for (double x : c) freq.put(x, freq.getOrDefault(x, 0) + 1);
+        Double moda = null; int mejor = 0;
+        for (Map.Entry<Double, Integer> e : freq.entrySet()) {
+            if (e.getValue() > mejor) { mejor = e.getValue(); moda = e.getKey(); }
         }
-        return max;
+        // si todas aparecen 1 vez, devolvemos null (sin moda)
+        return (mejor <= 1) ? null : moda;
     }
 
-    public double rango() {
-        return maximo() - minimo(); // diferencia entre el mayor y el menor
+    // Top N mayores (costos)
+    public ArrayList<Double> topNAltos(int n) {
+        ArrayList<Double> c = getCostos();
+        Collections.sort(c); // asc
+        Collections.reverse(c); // desc
+        if (n > c.size()) n = c.size();
+        return new ArrayList<>(c.subList(0, n));
     }
 
-    public double varianza() {
-        if (head == null) return 0;
-        double prom = promedio(); // calculo el promedio
-        double suma = 0; // acumulador
-        int contador= 0; // cantidad de elementos
-        NodoDoble p = head;
-        while (p != null) {
-            suma += Math.pow(p.data.getCosto() - prom, 2); // diferencia al cuadrado respecto al promedio
-            count++;
-            p = p.next;
-        }
-        return suma / count; // varianza poblacional
+    // Top N menores (costos)
+    public ArrayList<Double> topNBajos(int n) {
+        ArrayList<Double> c = getCostos();
+        Collections.sort(c); // asc
+        if (n > c.size()) n = c.size();
+        return new ArrayList<>(c.subList(0, n));
     }
-
-    public double desviacionEstandar() {
-        return Math.sqrt(varianza()); // raíz cuadrada de la varianza
-    }
-
-    public double mediana() {
-        ordenarPorCosto();         // ordenamos la lista por costo
-        int n = contarReservas();  // cantidad de reservas
-        if (n == 0) return 0;      // lista vacía
-        NodoDoble p = head;        // recorremos hasta la mitad
-        for (int i = 0; i < (n - 1) / 2; i++) {
-            p = p.next;
-        }
-        if (n % 2 == 1) {
-            return p.data.getCosto();                    // si es impar → valor del medio
-        } else {
-            return (p.data.getCosto() + p.next.data.getCosto()) / 2.0; // si es par → promedio de los 2 del centro
-        }
-    }
-
-    public double moda() {
-        if (head == null) return 0;  
-        ordenarPorCosto();           // ordenamos por costo
-        double moda = head.data.getCosto(); // arranco con el primero
-        int maxCont = 1, cont = 1;        // frecuencias
-        NodoDoble p = head.next;
-
-        while (p != null) {
-            if (p.data.getCosto() == p.prev.data.getCosto()) {
-                cont++;                    // aumento frecuencia
-                if (count > maxCont) {     // si es la mayor frecuencia encontrada
-                    maxCont = cont;
-                    moda = p.data.getCosto(); // actualizo moda
-                }
-            } else {
-                cont = 1;                  // reinicio conteo si cambia el valor
-            }
-            p = p.next;
-        }
-        return moda;                        
-    }
-
-    public String tablaFrecuencias() {
-        if (head == null) return "Lista vacía"; 
-        ordenarPorCosto();                     
-        StringBuilder sb = new StringBuilder("Costo | Frecuencia\n");
-        NodoDoble p = head;
-        while (p != null) {
-            double costo = p.data.getCosto();   // costo actual
-            int cont = 0;                      // frecuencia
-            while (p != null && p.data.getCosto() == costo) {
-                cont++;                        // contamos cuántos iguales hay
-                p = p.next;
-            }
-            sb.append(costo).append(" | ").append(cont).append("\n"); // añadimos a la tabla
-        }
-        return sb.toString();                   // devolvemos la tabla
-    }
-
-    public String topNAltos(int n) {
-        ordenarPorCosto();          
-        StringBuilder sb = new StringBuilder();
-        NodoDoble p = cola;         // empezamos desde el último (el mayor)
-        int count = 0;
-        while (p != null && count < n) {
-            sb.append(p.data).append("\n"); // añadimos al resultado
-            p = p.prev;                     // retrocedemos
-            count++;
-        }
-        return sb.toString();       // devolvemos los N más altos
-    }
-
-    public String topNBajos(int n) {
-        ordenarPorCosto();          
-        StringBuilder sb = new StringBuilder();
-        NodoDoble p = head;         // empezamos desde el menor
-        int count = 0;
-        while (p != null && count < n) {
-            sb.append(p.data).append("\n"); // añadimos al resultado
-            p = p.next;                    
-            count++;
-        }
-        return sb.toString();       // devolvemos los N más bajos
-    }
-
-    public String imprimirEnTexto() {
-        // Se usa un StringBuilder para ir armando una cadena de texto con todas las reservas
-        StringBuilder sb = new StringBuilder();
-        NodoDoble p = head;
-        while (p != null) {
-            // Se añade cada reserva en formato texto (gracias al toString de Reserva)
-            sb.append(p.data.toString()).append("\n");
-            // Avanzamos al siguiente nodo
-            p = p.next;
-        }
-        
-        // Si la lista está vacía, mostramos un aviso
-        if (sb.length() == 0) {
-            return "¡La lista está vacía.!";
-        }
-        // Retornamos el texto completo con todas las reservas
-        return sb.toString();
-    }
-
 }
-
