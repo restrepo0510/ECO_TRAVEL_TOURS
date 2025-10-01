@@ -110,6 +110,67 @@ public class ListaDobleReservas {
         }
     }
 
+
+// nueva: ordenar por cliente con opción asc/desc
+public void ordenarPorCliente(boolean asc) {
+    if (head == null) return;
+    NodoDoble i = head;
+    while (i != null) {
+        NodoDoble j = i.next;
+        while (j != null) {
+            int cmp = i.data.getCliente().compareToIgnoreCase(j.data.getCliente());
+            boolean debeIntercambiar = asc ? (cmp > 0) : (cmp < 0);
+            if (debeIntercambiar) {
+                Reserva tmp = i.data; i.data = j.data; j.data = tmp;
+            }
+            j = j.next;
+        }
+        i = i.next;
+    }
+}
+
+// ordenar por costo con opción asc/desc y desempate por cliente (alfabético)
+public void ordenarPorCosto(boolean asc) {
+    if (head == null) return;
+    NodoDoble i = head;
+    while (i != null) {
+        NodoDoble j = i.next;
+        while (j != null) {
+            double ci = i.data.getCosto();
+            double cj = j.data.getCosto();
+            int cmpCliente = i.data.getCliente().compareToIgnoreCase(j.data.getCliente());
+            boolean debeIntercambiar;
+            if (asc) {
+                // si ci > cj, o si iguales y cliente i > cliente j
+                debeIntercambiar = (ci > cj) || (ci == cj && cmpCliente > 0);
+            } else {
+                // descendente: si ci < cj, o si iguales y cliente i < cliente j
+                debeIntercambiar = (ci < cj) || (ci == cj && cmpCliente < 0);
+            }
+            if (debeIntercambiar) {
+                Reserva tmp = i.data; i.data = j.data; j.data = tmp;
+            }
+            j = j.next;
+        }
+        i = i.next;
+    }
+}
+
+//método UPDATE para modificar una reserva existente (devuelve true si actualizó)
+public boolean actualizarReserva(int id, String nuevoCliente, double nuevoCosto) {
+    NodoDoble p = head;
+    while (p != null) {
+        if (p.data.getIdReserva() == id) {
+            // Actualiza solo si valores válidos 
+            if (nuevoCliente != null && !nuevoCliente.equals("")) p.data.setCliente(nuevoCliente);
+            if (nuevoCosto >= 0) p.data.setCosto(nuevoCosto);
+            return true;
+        }
+        p = p.next;
+    }
+    return false; // no encontrada
+}
+
     // ============================================================
     //                P U N T O   3 :  E S T A D Í S T I C A S
     // (Se usa ArrayList solo para cálculos; NO para ordenar la lista)
