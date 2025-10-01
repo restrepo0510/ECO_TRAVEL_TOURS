@@ -52,15 +52,19 @@ public class Demo { //Se definió el punto de entrada de la aplicación donde se
                     JOptionPane.showMessageDialog(null, lista.imprimirComoTexto());
                     break;  // Se muestran todas las reservas en un cuadro de diálogo.
                 }
-                case 5: { // Ordenar por cliente
-                    lista.ordenarPorCliente();
-                    JOptionPane.showMessageDialog(null, "Ordenada por cliente.");
+               case 5: { // Ordenar por cliente (pregunta A/D)
+                    String resp = JOptionPane.showInputDialog("Ordenar por cliente: A = ascendente, D = descendente").trim();
+                    boolean asc = resp.equalsIgnoreCase("A");
+                    lista.ordenarPorCliente(asc);
+                    JOptionPane.showMessageDialog(null, "Ordenada por cliente (" + (asc ? "A" : "D") + ").");
                     break;
                 }
-                case 6: { // Ordenar por costo
-                    lista.ordenarPorCosto();
-                    JOptionPane.showMessageDialog(null, "Ordenada por costo.");
-                    break; //// Se ordenan las reservas por nombre de cliente y se notifica al usuario.
+              case 6: { // Ordenar por costo (pregunta A/D) - desempata por cliente
+                    String resp = JOptionPane.showInputDialog("Ordenar por costo: A = ascendente, D = descendente").trim();
+                    boolean asc = resp.equalsIgnoreCase("A");
+                    lista.ordenarPorCosto(asc);
+                    JOptionPane.showMessageDialog(null, "Ordenada por costo (" + (asc ? "A" : "D") + ").");
+                    break;
                 }
                 case 7: { // Estadísticas punto 3
                     if (!lista.hayDatos()) {
