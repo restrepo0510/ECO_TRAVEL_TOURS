@@ -169,25 +169,25 @@ public class ListaDobleReservas {
     }
 
     public double desviacionEstandarCosto() {
-        return Math.sqrt(varianzaCosto());
+        return Math.sqrt(varianzaCosto()); //Devuelve la raíz cuadrada de la varianza (desviación estándar).
     }
 
     public double medianaCosto() {
         ArrayList<Double> c = getCostos();
         if (c.isEmpty()) return 0;
-        Collections.sort(c);
-        int n = c.size();
-        if (n % 2 == 1) return c.get(n / 2);
-        return (c.get(n / 2 - 1) + c.get(n / 2)) / 2.0;
+        Collections.sort(c); //Se ordenó la lista de costos en orden ascendente.
+        int n = c.size(); //Se obtiene el tamaño n de la lista ordenada.
+        if (n % 2 == 1) return c.get(n / 2); //Se devolvió el elemento del medio si la cantidad es impar
+        return (c.get(n / 2 - 1) + c.get(n / 2)) / 2.0; //Devuelve el promedio de los dos del medio si la cantidad es par.
     }
 
     public Double modaCosto() {
         ArrayList<Double> c = getCostos();
         if (c.isEmpty()) return null;
-        Map<Double, Integer> freq = new HashMap<>();
-        for (double x : c) freq.put(x, freq.getOrDefault(x, 0) + 1);
+        Map<Double, Integer> freq = new HashMap<>(); //Se creó un mapa freq para contar frecuencias por costo.
+        for (double x : c) freq.put(x, freq.getOrDefault(x, 0) + 1); //Se llenó el mapa incrementando el contador para cada costo.
         Double moda = null; int mejor = 0;
-        for (Map.Entry<Double, Integer> e : freq.entrySet()) {
+        for (Map.Entry<Double, Integer> e : freq.entrySet()) { //Se iteró sobre las entradas del mapa de frecuencias
             if (e.getValue() > mejor) { mejor = e.getValue(); moda = e.getKey(); }
         }
         // si todas aparecen 1 vez, devolvemos null (sin moda)
